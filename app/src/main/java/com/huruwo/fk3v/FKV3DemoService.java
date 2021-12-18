@@ -5,14 +5,14 @@ import android.content.pm.PackageManager;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.widget.Toast;
 
 import com.orhanobut.logger.Logger;
 
-public class Fk3VService extends VpnService {
+public class FKV3DemoService extends VpnService {
 
     private ParcelFileDescriptor descriptor;//vpn服务配置
 
-    private PackageManager packageManager = getPackageManager();
 
 
     @Override
@@ -26,8 +26,8 @@ public class Fk3VService extends VpnService {
 
         //如果有代理相关参数 从Inten里面传入取得 比如端口号这些
 
-        String arg1 = intent.getStringExtra("arg1");
-        String arg2 = intent.getStringExtra("arg2");
+        //String arg1 = intent.getStringExtra("arg1");
+        //String arg2 = intent.getStringExtra("arg2");
 
 
        //
@@ -35,7 +35,7 @@ public class Fk3VService extends VpnService {
         initDescriptor();
 
         if(descriptor==null) {
-            Logger.e("配置失败");
+            Toast.makeText(this,"配置失败",Toast.LENGTH_LONG).show();
             return START_STICKY;
         }
 
@@ -55,6 +55,8 @@ public class Fk3VService extends VpnService {
     private void initDescriptor(){
         Builder descriptorBuilder = new Builder();
 
+        PackageManager packageManager = getPackageManager();
+
         String[] appPackages = {
                 "com.example.xxxx"
         };  //允许代理的APP列表
@@ -73,32 +75,37 @@ public class Fk3VService extends VpnService {
 
         descriptorBuilder.setSession(getString(R.string.app_name));
 
+        descriptorBuilder.setMtu(1500);
 
         //添加至少一个 IPv4 或 IPv6 地址以及系统指定为本地 TUN 接口地址的子网掩码
-        descriptorBuilder.addAddress("10.1.10.1", 32);
-
-        descriptorBuilder.addAddress("fd00:1:fd00:1:fd00:1:fd00:1", 128);
+        descriptorBuilder.addAddress("26.26.26.1", 32);
 
         //0.0.0.0 0 允许所有流量通过 两种 ipv4 ipv6
 
         descriptorBuilder.addRoute("0.0.0.0", 0);
 
-        descriptorBuilder.addRoute("0:0:0:0:0:0:0:0", 0);
-
-
-
-
-
-        for (String appPackage: appPackages) {
-            try {
-                packageManager.getPackageInfo(appPackage, 0);
-                descriptorBuilder.addAllowedApplication(appPackage);
-            } catch (PackageManager.NameNotFoundException e) {
-                // The app isn't installed.
-                Logger.d("添加允许的VPN应用出错，未找到");
-                e.printStackTrace();
-            }
+        try {
+            descriptorBuilder.addDisallowedApplication(getPackageName());
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
         }
+
+        descriptorBuilder.addDnsServer("8.8.8.8");
+
+        descriptorBuilder.addRoute("8.8.8.8", 32);
+
+
+
+//        for (String appPackage: appPackages) {
+//            try {
+//                packageManager.getPackageInfo(appPackage, 0);
+//                descriptorBuilder.addAllowedApplication(appPackage);
+//            } catch (PackageManager.NameNotFoundException e) {
+//                // The app isn't installed.
+//                Logger.d("添加允许的VPN应用出错，未找到");
+//                e.printStackTrace();
+//            }
+//        }
 
         descriptor = descriptorBuilder.establish();
     }
