@@ -8,15 +8,25 @@ import android.content.pm.PackageManager;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.orhanobut.logger.Logger;
 
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+
 public class FKV3DemoService extends VpnService {
 
-    private ParcelFileDescriptor descriptor;//vpn服务配置
+    private ParcelFileDescriptor vpnParcelDescriptor;//vpn服务配置
+    private FileDescriptor vpnFileDescriptor;
+
     public static String VPN_INTENT_CMD = "vpn_tag";
     public static String STOP_SERVICE = "stop_service";
 
@@ -50,9 +60,17 @@ public class FKV3DemoService extends VpnService {
         if (arg1!=null) {
             Toast.makeText(this,"参数传递"+arg1,Toast.LENGTH_LONG).show();
         }
+
         initDescriptor();
 
-        if(descriptor==null) {
+        vpnFileDescriptor = vpnParcelDescriptor.getFileDescriptor();
+
+        FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
+        FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
+
+
+
+        if(vpnParcelDescriptor==null) {
             Toast.makeText(this,"配置失败",Toast.LENGTH_LONG).show();
             return START_STICKY;
         }
@@ -63,6 +81,8 @@ public class FKV3DemoService extends VpnService {
             //高版本的系统里面设置 前台服务提高保活
             //foregroundService
         }
+
+        vpnParcelDescriptor.getFd();
 
 
 
@@ -96,7 +116,7 @@ public class FKV3DemoService extends VpnService {
         descriptorBuilder.setMtu(1500);
 
         //添加至少一个 IPv4 或 IPv6 地址以及系统指定为本地 TUN 接口地址的子网掩码
-        descriptorBuilder.addAddress("26.26.26.1", 32);
+        descriptorBuilder.addAddress("10.0.0.2", 32);
 
         //0.0.0.0 0 允许所有流量通过 两种 ipv4 ipv6
 
@@ -112,8 +132,6 @@ public class FKV3DemoService extends VpnService {
 
         descriptorBuilder.addRoute("8.8.8.8", 32);
 
-
-
 //        for (String appPackage: appPackages) {
 //            try {
 //                packageManager.getPackageInfo(appPackage, 0);
@@ -125,7 +143,7 @@ public class FKV3DemoService extends VpnService {
 //            }
 //        }
 
-        descriptor = descriptorBuilder.establish();
+        vpnParcelDescriptor = descriptorBuilder.establish();
     }
 
     @Override
@@ -142,8 +160,8 @@ public class FKV3DemoService extends VpnService {
 
     public void stopService() {
         try {
-            if(descriptor!=null) {
-                descriptor.close();
+            if(vpnParcelDescriptor!=null) {
+                vpnParcelDescriptor.close();
             }
             stopForeground(true);
             stopSelf();
