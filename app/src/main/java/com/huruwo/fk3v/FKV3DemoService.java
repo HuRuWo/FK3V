@@ -1,37 +1,55 @@
 package com.huruwo.fk3v;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.widget.Toast;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.orhanobut.logger.Logger;
 
 public class FKV3DemoService extends VpnService {
 
     private ParcelFileDescriptor descriptor;//vpn服务配置
+    public static String VPN_INTENT_CMD = "vpn_tag";
+    public static String STOP_SERVICE = "stop_service";
 
-
+    private BroadcastReceiver stopBr = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if ("stop_kill".equals(intent.getAction())) {
+                Toast.makeText(getApplicationContext(),"关闭VPN服务",Toast.LENGTH_LONG).show();
+                stopService();
+            }
+        }
+    };
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //创建广播接收者
+        LocalBroadcastManager lbm =
+                LocalBroadcastManager.getInstance(this);
+        lbm.registerReceiver(stopBr, new IntentFilter("stop_kill"));
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
 
-        //如果有代理相关参数 从Inten里面传入取得 比如端口号这些
-
-        //String arg1 = intent.getStringExtra("arg1");
-        //String arg2 = intent.getStringExtra("arg2");
-
-
-       //
-
+        //如果有代理相关参数 从Inten里面传入取得 比如端口号这些 结束命令
+        String arg1 = intent.getStringExtra("VPN_INTENT_CMD");
+        if (arg1!=null) {
+            Toast.makeText(this,"参数传递"+arg1,Toast.LENGTH_LONG).show();
+        }
         initDescriptor();
 
         if(descriptor==null) {
@@ -108,6 +126,30 @@ public class FKV3DemoService extends VpnService {
 //        }
 
         descriptor = descriptorBuilder.establish();
+    }
+
+    @Override
+    public boolean stopService(Intent name) {
+        Logger.e("stopService");
+        return super.stopService(name);
+    }
+
+    @Override
+    public void onDestroy() {
+        Logger.e("onDestroy");
+        super.onDestroy();
+    }
+
+    public void stopService() {
+        try {
+            if(descriptor!=null) {
+                descriptor.close();
+            }
+            stopForeground(true);
+            stopSelf();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
