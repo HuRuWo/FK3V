@@ -66,7 +66,7 @@ public class FKV3DemoService extends VpnService {
 
 
 
-        captureNetData();
+        //captureNetData();
 
 
 
@@ -144,7 +144,27 @@ public class FKV3DemoService extends VpnService {
 
         // Just bypass myself
         try {
-            descriptorBuilder.addDisallowedApplication(getPackageName());
+
+            //什么都不加 没网络
+
+
+//            descriptorBuilder.addDisallowedApplication("mark.via");//有网络
+
+
+//            descriptorBuilder.addDisallowedApplication(getPackageName());
+//            descriptorBuilder.addDisallowedApplication("mark.via");//有网络
+
+//             descriptorBuilder.addAllowedApplication(getPackageName());
+//             descriptorBuilder.addDisallowedApplication("mark.via");//没有网络
+
+//             descriptorBuilder.addDisallowedApplication(getPackageName());
+//             descriptorBuilder.addAllowedApplication("mark.via");//没有网络
+
+
+//            descriptorBuilder.addAllowedApplication(getPackageName());
+//            descriptorBuilder.addAllowedApplication("mark.via");//没有网络
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
