@@ -1,19 +1,13 @@
 package com.huruwo.fk3v;
 
-import static com.huruwo.fk3v.FKV3DemoService.STOP_SERVICE;
-import static com.huruwo.fk3v.FKV3DemoService.VPN_INTENT_CMD;
-
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.content.Intent;
 import android.net.VpnService;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -68,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            Intent intent1 = new Intent(MainActivity.this,FKV3DemoService.class);
+            Intent intent1 = new Intent(MainActivity.this, FKV3DemoService.class);
             startService(intent1);
         }
     }
