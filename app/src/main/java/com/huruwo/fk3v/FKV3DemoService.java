@@ -65,8 +65,7 @@ public class FKV3DemoService extends VpnService {
 
         vpnFileDescriptor = vpnParcelDescriptor.getFileDescriptor();
 
-        FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
-        FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
+
 
 
 
@@ -89,14 +88,13 @@ public class FKV3DemoService extends VpnService {
         return START_STICKY; //START_STICKY 服务被杀死重新调用onStartCommand
     }
 
-
     private void initDescriptor(){
         Builder descriptorBuilder = new Builder();
 
         PackageManager packageManager = getPackageManager();
 
         String[] appPackages = {
-                "com.example.xxxx"
+                "com.huruwo.fk3v"
         };  //允许代理的APP列表
 
       //关于这里参数设置解析 我们还是要从官方文档来看 https://developer.android.google.cn/guide/topics/connectivity/vpn
@@ -132,19 +130,31 @@ public class FKV3DemoService extends VpnService {
 
         descriptorBuilder.addRoute("8.8.8.8", 32);
 
-//        for (String appPackage: appPackages) {
-//            try {
-//                packageManager.getPackageInfo(appPackage, 0);
-//                descriptorBuilder.addAllowedApplication(appPackage);
-//            } catch (PackageManager.NameNotFoundException e) {
-//                // The app isn't installed.
-//                Logger.d("添加允许的VPN应用出错，未找到");
-//                e.printStackTrace();
-//            }
-//        }
+        for (String appPackage: appPackages) {
+            try {
+                packageManager.getPackageInfo(appPackage, 0);
+                descriptorBuilder.addAllowedApplication(appPackage);
+            } catch (PackageManager.NameNotFoundException e) {
+                // The app isn't installed.
+                Logger.d("添加允许的VPN应用出错，未找到");
+                e.printStackTrace();
+            }
+        }
 
         vpnParcelDescriptor = descriptorBuilder.establish();
     }
+
+    private void captureNetData(){
+        FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
+        FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
+
+
+
+
+
+
+    }
+
 
     @Override
     public boolean stopService(Intent name) {

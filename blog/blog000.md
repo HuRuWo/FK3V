@@ -14,6 +14,3 @@ VPNService是android系统自带的VPN服务。基于VPNService你可以拦截�
 
 2.网络穿透服务
 
-原理分析图
-
-![img.png](https://developer.android.com/images/guide/topics/connectivity/vpn-app-arch.svg)
