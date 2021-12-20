@@ -8,12 +8,10 @@ import android.content.pm.PackageManager;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.orhanobut.logger.Logger;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -66,6 +64,7 @@ public class FKV3DemoService extends VpnService {
         vpnFileDescriptor = vpnParcelDescriptor.getFileDescriptor();
 
 
+        captureNetData();
 
 
 
@@ -130,27 +129,44 @@ public class FKV3DemoService extends VpnService {
 
         descriptorBuilder.addRoute("8.8.8.8", 32);
 
-        for (String appPackage: appPackages) {
-            try {
-                packageManager.getPackageInfo(appPackage, 0);
-                descriptorBuilder.addAllowedApplication(appPackage);
-            } catch (PackageManager.NameNotFoundException e) {
-                // The app isn't installed.
-                Logger.d("添加允许的VPN应用出错，未找到");
-                e.printStackTrace();
-            }
-        }
+//        for (String appPackage: appPackages) {
+//            try {
+//                packageManager.getPackageInfo(appPackage, 0);
+//                descriptorBuilder.addAllowedApplication(appPackage);
+//            } catch (PackageManager.NameNotFoundException e) {
+//                // The app isn't installed.
+//                Logger.d("添加允许的VPN应用出错，未找到");
+//                e.printStackTrace();
+//            }
+//        }
 
         vpnParcelDescriptor = descriptorBuilder.establish();
     }
 
     private void captureNetData(){
-        FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
-        FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
 
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //输入读取
 
+                FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
+                ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
+                while (!Thread.interrupted()) {
+                    int readBytes = 0;
+                    try {
+                        readBytes = vpnInput.read(byteBuffer);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    LogXUtils.e("读取字节:"+readBytes+"");
+                }
+                //输出读取
+                FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
+            }
+        }).start();
 
 
     }
@@ -158,13 +174,13 @@ public class FKV3DemoService extends VpnService {
 
     @Override
     public boolean stopService(Intent name) {
-        Logger.e("stopService");
+        LogXUtils.e("stopService");
         return super.stopService(name);
     }
 
     @Override
     public void onDestroy() {
-        Logger.e("onDestroy");
+        LogXUtils.e("onDestroy");
         super.onDestroy();
     }
 

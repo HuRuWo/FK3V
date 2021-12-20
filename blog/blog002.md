@@ -35,3 +35,35 @@ local TUN interface 意为本地端口转发，其实这也是VPNService服务�
 
 ### 解析APP数据流量
 
+网络协议有很多种，这里以http/https(TCP)为例，来看下VPNService对TCP流量的处理。
+
+>VpnService 和相关的 Builder 类允许应用指定网络参数，比如接口 IP 地址和路由，随后系统使用这些参数创建并配置一个虚拟网络接口。
+> 应用将会接收到一个该网络接口对应的文件描述符，之后就可以通过写入或者读取该描述符进行网络隧道通信。
+
+#### 几个重要的类和方法
+
+ParcelFileDescriptor
+
+文件描述符，是一种程序读写已打开文件、socket的对象。
+在VPNService由DescriptorBuilder创建。
+
+FileDescriptor
+
+它代表了原始的Linux文件描述符。在VPNService中由ParcelFileDescriptor直接调用getFileDescriptor()方法得到。
+
+在FileDescriptor对象的基础上我们可以对这个对象进行读写操作。
+
+
+FileChannel
+
+针对FileDescriptor文件对象，我们建立读写通道。
+
+```java
+FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
+FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
+```
+
+#### 文件数据读取
+
+
+
