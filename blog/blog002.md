@@ -65,5 +65,18 @@ FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
 
 #### 文件数据读取
 
+如此，我们在FileDescriptors上面插了两个管道
 
+vpnInput  数据进入管道
 
+vpnOutput 数据流出管道
+
+为了避免影响测试效果，先让vpn只允许自己用
+
+```java
+     try {
+            descriptorBuilder.addDisallowedApplication(getPackageName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+```

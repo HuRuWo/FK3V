@@ -61,7 +61,9 @@ public class FKV3DemoService extends VpnService {
 
         initDescriptor();
 
+
         vpnFileDescriptor = vpnParcelDescriptor.getFileDescriptor();
+
 
 
         captureNetData();
@@ -135,10 +137,17 @@ public class FKV3DemoService extends VpnService {
 //                descriptorBuilder.addAllowedApplication(appPackage);
 //            } catch (PackageManager.NameNotFoundException e) {
 //                // The app isn't installed.
-//                Logger.d("添加允许的VPN应用出错，未找到");
+//                LogXUtils.e("添加允许的VPN应用出错，未找到");
 //                e.printStackTrace();
 //            }
 //        }
+
+        // Just bypass myself
+        try {
+            descriptorBuilder.addDisallowedApplication(getPackageName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         vpnParcelDescriptor = descriptorBuilder.establish();
     }
